@@ -25,22 +25,61 @@ const Country = ({country}) => {
   )
 }
 
-const Countries = ({countries}) => {
+const Countries = ({countries, setShownCountries, hasKeyword}) => {
   console.log(countries)
-  return (
-    <div>
-      {countries.map(country => <Country key={country.name} country={country} />)}
-    </div>
-  )
+
+  if (!hasKeyword) {
+    return (
+      <div>
+        Please enter a search term.
+      </div>
+    )
+  }
+  else if (countries.length > 10) {
+    return (
+      <div>
+        Too many results, be more specific
+      </div>
+    )
+  }
+  else if (countries.length <= 10 && countries.length > 1) {
+    return (
+      <div>
+        {countries.map(country => <div key={country.name}>{country.name} <button onClick={() => setShownCountries([country])}>Show</button> </div>)}
+      </div>
+    )
+  }
+  else if (countries.length === 0) {
+    return (
+      <div>
+        No results found, try a different search
+      </div>
+    )
+  }
+
+  else {
+    return (
+      <div>
+        <Country country={countries[0]} />)
+      </div>
+    )
+  }
+
 }
 
 const App = () => {
   const [ countries, setCountries ] = useState([])
+  const [ shownCountries, setShownCountries ] = useState([])
   const [ keyword, setKeyword ] = useState('')
 
-  const handleKeyword = event => setKeyword(event.target.value)
+  const handleKeyword = event => {
+    setKeyword(event.target.value)
+    setShownCountries(filterCountries(event.target.value)) // Make sure not to pass the 
+  }
 
-  const filteredCountries = () => {
+  const hasKeyword = () => keyword !== ''
+
+  const filterCountries = (keyword) => {
     if (keyword === '') {
       return countries
     }
@@ -61,7 +100,7 @@ const App = () => {
   return (
     <div>
       <SearchBar keyword={keyword} handleKeyword={handleKeyword} />
-      <Countries countries={filteredCountries()} /> 
+      <Countries countries={shownCountries} setShownCountries={setShownCountries} hasKeyword={hasKeyword()} /> 
     </div>
   )
 }
