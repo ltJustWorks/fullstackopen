@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import axios  from '../../phonebook/node_modules/axios'
+import axios  from 'axios'
 
 const SearchBar = ({keyword, handleKeyword}) => {
   return (
@@ -11,6 +11,22 @@ const SearchBar = ({keyword, handleKeyword}) => {
 
 const Country = ({country}) => {
   console.log(country)
+  const [ weather, setWeather ] = useState({})
+
+  useEffect(() => {
+    const query = country.capital
+
+    axios
+      .get(`http://api.weatherstack.com/current?access_key=${process.env.REACT_APP_API_KEY}&query=${query}`)
+      .then(response => {
+        console.log(response.data)
+        setWeather(response.data.current)
+        console.log('setWeather success')
+      })
+  }, [country.capital])
+
+  console.log(weather)
+  console.log('array: ' + weather.weather_icons)
   return (
     <div>
       <h1>{country.name}</h1>
@@ -21,6 +37,11 @@ const Country = ({country}) => {
         {country.languages.map(language => <li key={language.name}>{language.name}</li>)}
       </ul>
       <img src={country.flag} alt={'flag of ' + country.name} width='300px' height='200px' />
+
+      <h2>Weather in {country.capital}</h2>
+      <div><b>Temperature:</b> {weather.temperature} Celsius</div>
+      <img src={weather.weather_icons} alt={weather.weather_descriptions} />
+      <div><b>Wind:</b> {weather.wind_speed} direction {weather.wind_dir}</div>
     </div>
   )
 }
@@ -60,7 +81,7 @@ const Countries = ({countries, setShownCountries, hasKeyword}) => {
   else {
     return (
       <div>
-        <Country country={countries[0]} />)
+        <Country country={countries[0]} />
       </div>
     )
   }
