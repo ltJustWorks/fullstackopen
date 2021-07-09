@@ -1,94 +1,76 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-
-const Filter = ({keyword, handleKeyword}) => {
-  return (
-    <div>
-      filter shown with <input value={keyword} onChange={handleKeyword}/>
-    </div>
-  )
-}
-
-const Person = ({person}) => {
-  return (
-    <div>
-      <p>{person.name} {person.number}</p>
-    </div>
-  )
-}
-
-const Persons = ({filteredPeople}) => {
-  return (
-    <div>
-      {filteredPeople.map(person => <Person person={person} key={person.name} />)}
-    </div>
-  )
-
-}
-
-const PersonForm = ({newName, handleNewName, newPhone, handleNewPhone, addPerson}) => {
-  return (
-    <div>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNewName} />
-        </div>
-        <div>
-          number: <input value={newPhone} onChange={handleNewPhone} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-    </div>
-  )
- 
-}
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
+import personsService from './services/persons'
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
+  const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newPhone, setNewPhone ] = useState('')
   const [ keyword, setKeyword ] = useState('')
   const [ filter, setFilter ] = useState(false)
 
-  const dbPersonsHook = () => {
-    console.log('fetch start')
-    axios
-      .get('http://localhost:3001/persons')
+  useEffect(() => {
+    personsService
+      .getAll()
       .then(response => {
-        console.log('fetch done')
-        console.log(response.data)
         setPersons(response.data)
       })
-    }
-  
-  useEffect(dbPersonsHook, [])
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
 
-    const personNotUnq = persons.some(person => person.name === newName)
+    const newId = persons[persons.length - 1].id + 1
 
-    if (personNotUnq) {
-      alert(`${newName} is already added to phonebook`)
+    const newPerson = {
+      name: newName,
+      number: newPhone,
+      id: newId
+    }
+    console.log(newPerson)
+
+    const personCheck = persons.find(person => person.name === newName)
+
+    if (personCheck !== undefined) {
+      const id = personCheck.id
+      if (window.confirm(`${newName} is already added to phonebook, do you want to update the existing entry?`)) {
+        updatePerson(id, newPerson)
+      }
       setNewName('')
       setNewPhone('')
       return
     }
 
-    const newPerson = {
-      name: newName,
-      number: newPhone
-    }
-    setPersons(persons.concat(newPerson))
+    personsService
+      .add(newPerson)
+      .then(response => {
+        setPersons([...persons, response.data])
+      })
+
     setNewName('')
     setNewPhone('')
+  }
+
+  const updatePerson = (id, newPerson) => {
+    personsService
+      .update(id, newPerson)
+      .then(response => {
+        setPersons(persons.map(person => person.id !== id ? person : response.data))
+      })
+  }
+
+  const deletePerson = (id) => {
+    const personName = persons.find(person => person.id === id).name
+    if (!window.confirm(`Delete ${personName}?`)) return
+
+    personsService
+      .remove(id)
+      .then(response => {
+        console.log(response)
+        setPersons(persons.filter(person => person.id !== id))
+      })
   }
 
   const handleNewName = (event) => {
@@ -123,7 +105,7 @@ const App = () => {
       <h1>add a new</h1>
       <PersonForm newName={newName} handleNewName={handleNewName} newPhone={newPhone} handleNewPhone = {handleNewPhone} addPerson={addPerson} />
       <h2>Numbers</h2>
-      <Persons filteredPeople={filteredPeople} />
+      <Persons filteredPeople={filteredPeople} deletePerson={deletePerson} />
     </div>
   )
 }
