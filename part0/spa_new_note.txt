@@ -1,0 +1,7 @@
+note over Browser:
+Event handler is executed which prevents
+the default handling of the form submission,
+note is registered locally and is then sent to server
+end note
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/spa
+Server-->Browser: {content: "content", date: "datestring"}
