@@ -1,0 +1,14 @@
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+Server-->Browser: Status 302
+note over Browser:
+Browser is redirected to 
+https://studies.cs.helsinki.fi/exampleapp/notes
+end note
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+Server-->Browser: notes HTML
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+Server-->Browser: main.css
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+Server-->Browser: main.js
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+Server-->Browser: data.json
