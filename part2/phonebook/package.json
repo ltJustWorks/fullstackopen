@@ -19,6 +19,7 @@
     "eject": "react-scripts eject",
     "server": "json-server -p3001 --watch db.json"
   },
+  "proxy": "https://limitless-forest-66777.herokuapp.com",
   "eslintConfig": {
     "extends": [
       "react-app",
