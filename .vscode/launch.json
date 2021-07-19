@@ -5,11 +5,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "pwa-msedge",
+			"name": "Launch Program",
+			"program": "${file}",
 			"request": "launch",
-			"name": "Launch Edge against localhost",
-			"url": "http://localhost:3000",
-			"webRoot": "${workspaceFolder}"
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node",
+			"console": "integratedTerminal",
 		}
-	]
+	],
 }

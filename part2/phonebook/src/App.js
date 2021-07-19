@@ -41,14 +41,13 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
 
-    const newId = persons[persons.length - 1].id + 1
+    const newId = persons.length > 1 ? persons[persons.length - 1].id + 1 : 1
 
     const newPerson = {
       name: newName,
       number: newPhone,
       id: newId
     }
-    console.log(newPerson)
 
     const personCheck = persons.find(person => person.name === newName)
 
@@ -67,6 +66,9 @@ const App = () => {
       .then(response => {
         setPersons([...persons, response.data])
         handleNotificationMessage(`Added ${newName}`)
+      })
+      .catch(error => {
+        handleErrorMessage('Error when adding entry')
       })
 
     setNewName('')
