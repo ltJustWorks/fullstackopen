@@ -18,8 +18,6 @@ morgan.token('json-object', (request, response) => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :json-object'))
 
 
-
-
 app.get('/api/persons', (request, response) => {
 	Person.find({}).then(persons => {
 		response.json(persons)
@@ -38,17 +36,12 @@ app.get('/api/persons/:id', (request, response, next) => {
 	.catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
-  if (!body) {
+  if (!body.name || !body.number) {
 	  return response.status(404).json({
-		  error: 'No person has been inputted'
-	  })
-  }
-  else if (!body.name || !body.number) {
-	  return response.status(404).json({
-		  error: 'The name or number is missing'
+		  error: 'name or number is missing'
 	  })
   }
 
@@ -58,26 +51,33 @@ app.post('/api/persons', (request, response) => {
 	  number: body.number,
   })
 
-  newPerson.save().then(result => {
+  newPerson.save()
+  	.then(result => {
 	  console.log(newPerson.name, newPerson.number, 'saved to phonebook')
 	  response.json(result)
-  })
+  	})
+  	.catch(error => next(error))
 })
 
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
 	const body = request.body
 	Person.findByIdAndUpdate(request.params.id, {name: body.name, number: body.number}, {new: true})
 		.then(result => {
 			console.log(request.body.name, 'was updated')
 			response.json(result)
 		})
+		.catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-	Person.findByIdAndRemove(request.params.id).then(result => {
+	Person.findByIdAndRemove(request.params.id)
+	.then(result => {
 		response.status(204).end()
 	})
-	.catch(error => next(error))
+	.catch(error => {
+		console.log(error)
+		next(error)
+	})
 })
 
 app.get('/info', (request, response) => {
@@ -95,10 +95,16 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-	console.log(error.message)
-
 	if (error.name === 'CastError') {
-		return response.status(400).send({error: 'malformatted id'})
+		if (error.kind === 'ObjectId') {
+			return response.status(400).send({error: 'malformatted id'})
+		}
+		else if (error.kind === 'Number') {
+			return response.status(400).json({error: 'invalid number'})
+		}
+	}
+	else if (error.name === 'ValidationError') {
+		return response.status(400).json({error: error.message})
 	}
 
 	next(error)
