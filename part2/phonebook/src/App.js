@@ -68,7 +68,7 @@ const App = () => {
         handleNotificationMessage(`Added ${newName}`)
       })
       .catch(error => {
-        handleErrorMessage('Error when adding entry')
+        handleErrorMessage(error.response.data.error)
       })
 
     setNewName('')
@@ -83,9 +83,7 @@ const App = () => {
         handleNotificationMessage(`Changed ${newName}'s number to ${newPhone}`)
       })
       .catch(error => {
-        console.log('error: ', error)
-        handleErrorMessage(`Information of ${newPerson.name} was already removed from server`)
-        setPersons(persons.filter(person => person.id !== id))
+        handleErrorMessage(error.response.data.error)
       })
   }
 

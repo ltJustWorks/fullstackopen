@@ -7,7 +7,7 @@ const url = process.env.MONGODB_URI
 console.log('connecting to', url)
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-    .then(result => {
+    .then(() => {
         console.log('connected to mongodb')
     })
     .catch(error => {
@@ -22,19 +22,19 @@ const personSchema = new mongoose.Schema({
         unique: true,
     },
     number: {
-        type: Number,
-        min: 8,
-        required: true, 
+        type: String,
+        minLength: 8,
+        required: true,
     },
     id: Number,
 })
 
 personSchema.set('toJSON', {
-	transform: (document, returnedObject) => {
-		returnedObject.id = returnedObject._id.toString()
-		delete returnedObject._id
-		delete returnedObject.__v
-	}
+    transform: (_document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject._id
+        delete returnedObject.__v
+    }
 })
 personSchema.plugin(uniqueValidator)
 
